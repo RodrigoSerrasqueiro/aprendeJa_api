@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
 
 const Student = mongoose.model('Student', {
   name: String,
@@ -7,4 +7,4 @@ const Student = mongoose.model('Student', {
   password: String,
 })
 
-module.exports = Student;
+export default Student;
