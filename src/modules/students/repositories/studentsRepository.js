@@ -134,6 +134,22 @@ class StudentRepository {
       res.status(500).json({error: error});
     }
   }
+
+  async deleteStudentsByCPF(req, res) {
+    try {
+      const cpfs = req.body; 
+  
+      const result = await Student.deleteMany({ cpf: { $in: cpfs } });
+  
+      if (result.deletedCount > 0) {
+        return res.status(200).json({ message: 'Alunos deletados com sucesso.' });
+      } else {
+        return res.status(404).json({ message: 'Nenhum aluno encontrado para deletar.' });
+      }
+    } catch (error) {
+      return res.status(500).json({ message: 'Não foi possível deletar os alunos.' });
+    }
+  }
 }
 
 export default StudentRepository;

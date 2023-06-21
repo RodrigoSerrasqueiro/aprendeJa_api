@@ -28,4 +28,8 @@ studentRoutes.delete('/:cpf', (req, res) => {
   studentRepository.deleteStudent(req, res);
 })
 
+studentRoutes.post('/delete-students', (req, res) => {
+  studentRepository.deleteStudentsByCPF(req, res);
+});
+
 export default studentRoutes ;
