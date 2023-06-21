@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 
-const Student = mongoose.model('Student', {
+//'alunos' é nome da coleção. 
+const Student = mongoose.model('alunos', {
   name: String,
   email: String,
   cpf: String,

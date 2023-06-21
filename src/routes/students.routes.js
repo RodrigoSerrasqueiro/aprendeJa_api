@@ -8,6 +8,10 @@ studentRoutes.post('/create-student', (req, res) => {
   studentRepository.createStudent(req, res)
 })
 
+studentRoutes.post('/create-many-students', (req, res) => {
+  studentRepository.createStudents(req, res)
+})
+
 studentRoutes.get('/get-students', (req, res) => {
   studentRepository.getStudents(req, res)
 })

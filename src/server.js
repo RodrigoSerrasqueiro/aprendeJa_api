@@ -16,7 +16,9 @@ app.use(express.json());
 app.use('/students', studentsRoutes);
 
 // Conexão com o banco de dados e inicialização do servidor
-mongoose.connect(process.env.HOST_DATABASE)
+const { HOST_USERNAME, HOST_PASSWORD, HOST_CLUSTER, HOST_DATABASE } = process.env;
+const URI = `mongodb+srv://${HOST_USERNAME}:${HOST_PASSWORD}@${HOST_CLUSTER}/${HOST_DATABASE}?retryWrites=true&w=majority`;
+mongoose.connect(URI)
   .then(() => {
     console.log('Connect to the MongoDB');
     app.listen(PORT, () => {
