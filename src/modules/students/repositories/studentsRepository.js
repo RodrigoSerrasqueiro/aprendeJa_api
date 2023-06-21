@@ -1,6 +1,21 @@
 import Student from '../models/Student.js';
 import bcrypt from 'bcrypt'
 
+async function validateStudentData(data) {
+  const { name, email, cpf } = data;
+  const errors = [];
+
+  if (!name) {
+    errors.push("O campo 'name' é obrigatório.");
+  }
+
+  if (!cpf) {
+    errors.push("O campo 'cpf' é obrigatório.");
+  }
+
+  return errors;
+}
+
 class StudentRepository {
   
   async createStudent(req, res) {
@@ -16,8 +31,9 @@ class StudentRepository {
   
     //criar validações para o envio
   
-    if (!name || !email || !cpf ) {
-      res.status(424).json({error: 'Campos obrigatórios precisam ser preenchidos.'})
+    const validationErrors = await validateStudentData(req.body);
+    if (validationErrors.length > 0) {
+      res.status(400).json({ errors: validationErrors });
       return;
     }
   
@@ -25,7 +41,7 @@ class StudentRepository {
       await Student.create(student)
       res.status(201).json({message: 'Aluno inserido com sucesso!'})
     } catch (error) {
-      res.status(500).json({error: error})
+      res.status(500).json({error: error.message})
     }
   }
 
@@ -38,34 +54,46 @@ class StudentRepository {
       res.status(424).json({ error: 'Alunos inválidos.' });
       return;
     }
+
+    const validationErrors = [];
+    const studentsWithHashedPasswords = [];
+  
+    for (const student of students) {
+      const errors = await validateStudentData(student);
+  
+      if (errors.length > 0) {
+        validationErrors.push({ student, errors });
+      } else {
+        const { cpf } = student;
+        const password = cpf;
+        const hashedPassword = await bcrypt.hash(password, 10);
+  
+        studentsWithHashedPasswords.push({
+          ...student,
+          password: hashedPassword,
+        });
+      }
+    }
+  
+    if (validationErrors.length > 0) {
+      res.status(400).json({ errors: validationErrors });
+      return;
+    }
   
     try {
-      // Criptografar as senhas dos alunos antes de inserir no banco de dados
-      const studentsWithHashedPasswords = await Promise.all(
-        students.map(async (student) => {
-          const { cpf } = student;
-          const password = cpf;
-          const hashedPassword = await bcrypt.hash(password, 10);
-          return {
-            ...student,
-            password: hashedPassword,
-          };
-        })
-      );
-  
       await Student.insertMany(studentsWithHashedPasswords);
       res.status(201).json({ message: 'Alunos inseridos com sucesso!' });
     } catch (error) {
-      res.status(500).json({ error: error });
+      res.status(500).json({ error: error.message });
     }
   }
   
   async getStudents(req, res) {
     try {
-      const studants = await Student.find();
-      res.status(200).json(studants)
+      const students = await Student.find();
+      res.status(200).json(students)
     } catch (error) {
-      res.status(500).json({error: error});
+      res.status(500).json({ error: 'Erro ao obter os alunos.' });
     }
   }
   
@@ -77,7 +105,7 @@ class StudentRepository {
     try {
       const student = await Student.findOne({cpf: cpf})
       if (!student) {
-        res.status(424).json({message: 'Aluno não encontrado'})
+        res.status(404).json({message: 'Aluno não encontrado'})
         return;
       }
   
@@ -94,7 +122,7 @@ class StudentRepository {
     const { name, email, password } = req.body
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const student = {
+    const updatedStudent = {
       name,
       email,
       cpf: studentCPF,
@@ -103,41 +131,54 @@ class StudentRepository {
   
     try {
 
-      const updatedStudent = await Student.updateOne({cpf: studentCPF}, student)
+      const student = await Student.findOneAndUpdate({cpf: studentCPF}, updatedStudent, {new: true})
   
-      if (updatedStudent.matchedCount === 0) {
-        res.status(424).json({message: 'Não foi possível atualizar os dados do aluno.'})
+      if (!student) {
+        res.status(404).json({ error: 'Aluno não encontrado para atualização.' });
         return;
-      } 
+      }
   
       res.status(200).json(student)
   
     } catch (error) {
-      res.status(500).json({error: error});
+      res.status(500).json({ error: 'Erro ao atualizar os dados do aluno.' });
     }
   }
   
   async deleteStudent(req, res) {
-    const cpf = req.params.cpf
+    const cpf = req.params.cpf;
   
-    const student = await Student.findOne({cpf: cpf})
-    if (!student) {
-      res.status(424).json({message: 'Aluno não encontrado'})
-      return;
-    }
-
     try {
-      await Student.deleteOne({cpf: cpf})
-      res.status(200).json({message: 'Aluno deletado com sucesso!'})
+      const deletedStudent = await Student.findOneAndDelete({ cpf: cpf });
   
+      if (!deletedStudent) {
+        res.status(404).json({ error: 'Aluno não encontrado.' });
+        return;
+      }
+  
+      res.status(200).json({ message: `Aluno com CPF ${cpf} deletado com sucesso!` });
     } catch (error) {
-      res.status(500).json({error: error});
+      res.status(500).json({ error: 'Erro ao deletar o aluno.' });
     }
   }
 
   async deleteStudentsByCPF(req, res) {
     try {
-      const cpfs = req.body; 
+      const cpfs = req.body;
+  
+      // Verificar se os cpfs são um array válido
+      if (!Array.isArray(cpfs)) {
+        return res.status(400).json({ error: 'Formato inválido. Esperado um array de cpfs.' });
+      }
+  
+      // Verificar se todos os cpfs estão presentes na lista de alunos
+      const students = await Student.find({ cpf: { $in: cpfs } });
+      const foundCpfs = students.map((student) => student.cpf);
+      const missingCpfs = cpfs.filter((cpf) => !foundCpfs.includes(cpf));
+  
+      if (missingCpfs.length > 0) {
+        return res.status(404).json({ message: `CPFs não encontrados: ${missingCpfs.join(', ')}` });
+      }
   
       const result = await Student.deleteMany({ cpf: { $in: cpfs } });
   
