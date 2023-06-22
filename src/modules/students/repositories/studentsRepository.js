@@ -5,7 +5,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 async function validateStudentData(data) {
-  const { name, email, cpf } = data;
+  const { name, cpf } = data;
   const errors = [];
 
   if (!name) {
@@ -111,11 +111,11 @@ class StudentRepository {
       if (errors.length > 0) {
         validationErrors.push({ student, errors });
       } else {
-        const { cpf, email } = student;
+        const { cpf } = student;
         const password = cpf;
         const hashedPassword = await bcrypt.hash(password, 10);
   
-        const existingStudent = await Student.findOne({ $or: [{ email }, { cpf }] });
+        const existingStudent = await Student.findOne({ cpf });
         if (existingStudent) {
           existingStudents.push(existingStudent);
         } else {
@@ -133,7 +133,8 @@ class StudentRepository {
     }
   
     if (existingStudents.length > 0) {
-      res.status(400).json({ message: 'Alunos já cadastrados.', students: existingStudents });
+      const existingStudentsList = students.filter(student => existingStudents.some(existingStudent => existingStudent.cpf === student.cpf));
+      res.status(400).json({ message: 'Os seguintes alunos dessa lista já possuem seus CPFs cadastrados no banco:', students: existingStudentsList });
       return;
     }
   
