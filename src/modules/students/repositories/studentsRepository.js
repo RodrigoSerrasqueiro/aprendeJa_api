@@ -39,18 +39,11 @@ class StudentRepository {
     }
   
     try {
-      const existingStudent = await Student.findOne({ $or: [{ email }, { cpf }] });
+      const existingStudent = await Student.findOne({ cpf });
       if (existingStudent) {
         let errorMessage = '';
-        if (existingStudent.email === email) {
-          errorMessage = 'E-mail já cadastrado';
-        }
         if (existingStudent.cpf === cpf) {
-          if (errorMessage) {
-            errorMessage += ' e CPF já cadastrados';
-          } else {
-            errorMessage = 'CPF já cadastrado';
-          }
+          errorMessage = 'Aluno já cadastrado';
         }
         res.status(400).json({ error: errorMessage });
         return;
