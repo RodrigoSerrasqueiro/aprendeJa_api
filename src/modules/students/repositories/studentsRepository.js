@@ -22,15 +22,15 @@ async function validateStudentData(data) {
 class StudentRepository {
   
   async createStudent(req, res) {
-    const { name, email, cpf } = req.body
-    const password = cpf
+    const { name, email, cpf } = req.body;
+    const password = cpf;
     const hashedPassword = await bcrypt.hash(password, 10);
     const student = {
       name,
       email,
       cpf,
-      password: hashedPassword
-    }
+      password: hashedPassword,
+    };
   
     const validationErrors = await validateStudentData(req.body);
     if (validationErrors.length > 0) {
@@ -39,10 +39,27 @@ class StudentRepository {
     }
   
     try {
-      await Student.create(student)
-      res.status(201).json({message: 'Aluno inserido com sucesso!'})
+      const existingStudent = await Student.findOne({ $or: [{ email }, { cpf }] });
+      if (existingStudent) {
+        let errorMessage = '';
+        if (existingStudent.email === email) {
+          errorMessage = 'E-mail já cadastrado';
+        }
+        if (existingStudent.cpf === cpf) {
+          if (errorMessage) {
+            errorMessage += ' e CPF já cadastrados';
+          } else {
+            errorMessage = 'CPF já cadastrado';
+          }
+        }
+        res.status(400).json({ error: errorMessage });
+        return;
+      }
+  
+      await Student.create(student);
+      res.status(201).json({ message: 'Aluno inserido com sucesso!' });
     } catch (error) {
-      res.status(500).json({error: error.message})
+      res.status(500).json({ error: error.message });
     }
   }
 
@@ -83,9 +100,10 @@ class StudentRepository {
       res.status(424).json({ error: 'Alunos inválidos.' });
       return;
     }
-
+  
     const validationErrors = [];
     const studentsWithHashedPasswords = [];
+    const existingStudents = [];
   
     for (const student of students) {
       const errors = await validateStudentData(student);
@@ -93,19 +111,29 @@ class StudentRepository {
       if (errors.length > 0) {
         validationErrors.push({ student, errors });
       } else {
-        const { cpf } = student;
+        const { cpf, email } = student;
         const password = cpf;
         const hashedPassword = await bcrypt.hash(password, 10);
   
-        studentsWithHashedPasswords.push({
-          ...student,
-          password: hashedPassword,
-        });
+        const existingStudent = await Student.findOne({ $or: [{ email }, { cpf }] });
+        if (existingStudent) {
+          existingStudents.push(existingStudent);
+        } else {
+          studentsWithHashedPasswords.push({
+            ...student,
+            password: hashedPassword,
+          });
+        }
       }
     }
   
     if (validationErrors.length > 0) {
       res.status(400).json({ errors: validationErrors });
+      return;
+    }
+  
+    if (existingStudents.length > 0) {
+      res.status(400).json({ message: 'Alunos já cadastrados.', students: existingStudents });
       return;
     }
   
