@@ -7,21 +7,8 @@ const studentSchema = new mongoose.Schema({
   password: { type: String, required: true },
   startedCourses: { type: [String], default: [''] },
   doneCourses: { type: [String], default: [''] },
-  doneLessons: {
-    type: [{
-      courseId: { type: String, default: '' },
-      lessonId: { type: String, default: '' },
-    }],
-    default: [{ courseId: '', lessonId: '' }],
-  },
-  notes: {
-    type: [{
-      courseId: { type: String, default: '' },
-      lessonId: { type: String, default: '' },
-      note: { type: String, default: '' },
-    }],
-    default: [{ courseId: '', lessonId: '', note: '' }],
-  },
+  doneLessons: [Object],
+  notes: [Object]
 });
 
 const Student = mongoose.model('alunos', studentSchema);
