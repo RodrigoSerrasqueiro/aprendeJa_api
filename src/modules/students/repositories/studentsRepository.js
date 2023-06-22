@@ -1,5 +1,8 @@
 import Student from '../models/Student.js';
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+dotenv.config()
 
 async function validateStudentData(data) {
   const { name, email, cpf } = data;
@@ -29,8 +32,6 @@ class StudentRepository {
       password: hashedPassword
     }
   
-    //criar validações para o envio
-  
     const validationErrors = await validateStudentData(req.body);
     if (validationErrors.length > 0) {
       res.status(400).json({ errors: validationErrors });
@@ -45,10 +46,38 @@ class StudentRepository {
     }
   }
 
+  async login(req, res) {
+    const { cpfOrEmail, password } = req.body;
+  
+    if (!cpfOrEmail || !password) {
+      return res.status(400).json({ error: 'CPF ou email e senha são obrigatórios.' });
+    }
+  
+    try {
+      const student = await Student.findOne({
+        $or: [{ cpf: cpfOrEmail }, { email: cpfOrEmail }]
+      });
+  
+      if (!student) {
+        return res.status(404).json({ message: 'Aluno não encontrado.' });
+      }
+  
+      const isPasswordValid = await bcrypt.compare(password, student.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: 'Senha incorreta.' });
+      }
+  
+      // Gerar o token JWT
+      const token = jwt.sign({ id: student._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1w' });
+      return res.status(200).json({ message: 'Aluno autenticado com sucesso.', token: token });
+
+    } catch (error) {
+      return res.status(500).json({ error: 'Não foi possível realizar o login do aluno.' });
+    }
+  }
+
   async createStudents(req, res) {
     const students = req.body;
-  
-    // Criar validações para o envio
   
     if (!students || !Array.isArray(students) || students.length === 0) {
       res.status(424).json({ error: 'Alunos inválidos.' });
