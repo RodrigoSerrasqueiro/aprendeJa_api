@@ -5,8 +5,12 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 async function validateStudentData(data) {
-  const { name, cpf } = data;
+  const { userType, name, cpf } = data;
   const errors = [];
+
+  if (!userType) {
+    errors.push("O campo 'userType' é obrigatório.");
+  }
 
   if (!name) {
     errors.push("O campo 'name' é obrigatório.");
@@ -22,10 +26,11 @@ async function validateStudentData(data) {
 class StudentRepository {
   
   async createStudent(req, res) {
-    const { name, email, cpf } = req.body;
+    const { userType, name, email, cpf } = req.body;
     const password = cpf;
     const hashedPassword = await bcrypt.hash(password, 10);
     const student = {
+      userType,
       name,
       email,
       cpf,
@@ -59,8 +64,10 @@ class StudentRepository {
   async login(req, res) {
     const { cpfOrEmail, password } = req.body;
   
-    if (!cpfOrEmail || !password) {
-      return res.status(400).json({ error: 'CPF ou email e senha são obrigatórios.' });
+    if (!cpfOrEmail) {
+      return res.status(400).json({ error: 'Digite seu CPF ou email.' });
+    } else if (!password) {
+      return res.status(400).json({ error: 'Digite sua senha.' });
     }
   
     try {
@@ -69,7 +76,7 @@ class StudentRepository {
       });
   
       if (!student) {
-        return res.status(404).json({ message: 'Aluno não encontrado.' });
+        return res.status(404).json({ message: 'Usuário não encontrado.' });
       }
   
       const isPasswordValid = await bcrypt.compare(password, student.password);
@@ -79,7 +86,7 @@ class StudentRepository {
   
       // Gerar o token JWT
       const token = jwt.sign({ id: student._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1w' });
-      return res.status(200).json({ message: 'Aluno autenticado com sucesso.', token: token });
+      return res.status(200).json({ message: 'Usuário autenticado com sucesso.', token: token });
 
     } catch (error) {
       return res.status(500).json({ error: 'Não foi possível realizar o login do aluno.' });
