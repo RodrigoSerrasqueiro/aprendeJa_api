@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 //type é como se fosse varchar em um banco relacional.
 //Default é um valor padrão a ser atribuido caso não seja atribuido nenhum valor aquele campo. 
 //required é como se fosse o not a null
-const studentSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   userType: { type: String, required: true },
   name: { type: String, required: true },
   email: { type: String, default: '' },
@@ -16,6 +16,6 @@ const studentSchema = new mongoose.Schema({
   notes: [Object]
 });
 
-const Student = mongoose.model('alunos', studentSchema);
+const User = mongoose.model('usuários', userSchema);
 
-export default Student;
+export default User;

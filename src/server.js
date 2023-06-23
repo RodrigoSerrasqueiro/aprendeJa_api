@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import studentsRoutes from './routes/students.routes.js';
+import usersRoutes from './routes/users.routes.js';
 
 dotenv.config();
 
@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Rotas
-app.use('/students', studentsRoutes);
+app.use('/users', usersRoutes);
 
 // Conexão com o banco de dados e inicialização do servidor
 const { HOST_USERNAME, HOST_PASSWORD, HOST_CLUSTER, HOST_DATABASE } = process.env;
