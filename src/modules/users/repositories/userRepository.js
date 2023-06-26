@@ -83,6 +83,11 @@ class UserRepository {
       if (!isPasswordValid) {
         return res.status(401).json({ message: 'Senha incorreta.' });
       }
+
+      // Verificar o tipo de usuário
+      if (user.userType.toLowerCase() !== 'admin' && user.userType.toLowerCase() !== 'tutor') {
+        return res.status(401).json({ message: 'Login não autorizado. O usuário não é do tipo Admin ou Tutor.' });
+      }
   
       // Gerar o token JWT
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1w' });

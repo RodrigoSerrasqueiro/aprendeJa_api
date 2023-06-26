@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import usersRoutes from './routes/users.routes.js';
+import courseRoutes from './routes/courses.routes.js';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 // Rotas
 app.use('/users', usersRoutes);
+app.use('/courses', courseRoutes);
 
 // Conexão com o banco de dados e inicialização do servidor
 const { HOST_USERNAME, HOST_PASSWORD, HOST_CLUSTER, HOST_DATABASE } = process.env;
