@@ -8,6 +8,10 @@ courseRoutes.post('/create-course', (req, res) => {
   courseRepository.createCourse(req, res);
 });
 
+courseRoutes.post('/new-module/:courseID', (req, res) => {
+  courseRepository.addModuleToCourse(req, res);
+});
+
 courseRoutes.get('/get-courses', (req, res) => {
   courseRepository.getCourses(req, res);
 });
