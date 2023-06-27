@@ -158,6 +158,44 @@ class CourseRepository {
     }
   }
 
+  async addLessonToModule(req, res) {
+
+    const {courseID, moduleID} = req.params
+    const { lessonTitle, lessonDescription, lessonVideoURL } = req.body
+    try {
+      const lessonID = uuidv4();
+  
+      const lesson = {
+        lessonID,
+        lessonTitle,
+        lessonDescription,
+        lessonVideoURL
+      };
+  
+      const course = await Course.findOne({ courseID });
+  
+      if (!course) {
+        res.status(404).json({error: "Curso não encontrado."})
+        return;
+      }
+  
+      const module = course.modules.find((mod) => mod.moduleID === moduleID);
+  
+      if (!module) {
+        res.status(404).json({error: "Módulo não encontrado nesse curso."})
+        return;
+      }
+  
+      module.lessons.push(lesson);
+      await course.save();
+  
+      res.status(200).json({message: "Uma nova aula foi adicionada ao curso.", course: course})
+    } catch (error) {
+      console.error('Erro ao adicionar aula ao módulo:', error);
+      res.status(500).json({error: "Não foi possível adicionar a aula ao módulo"});
+    }
+  }
+
   async getCourses(req, res) {
     try {
       const courses = await Course.find();

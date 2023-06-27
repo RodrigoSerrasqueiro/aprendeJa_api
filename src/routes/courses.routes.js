@@ -12,6 +12,10 @@ courseRoutes.post('/new-module/:courseID', (req, res) => {
   courseRepository.addModuleToCourse(req, res);
 });
 
+courseRoutes.post('/new-lesson/:courseID/:moduleID', (req, res) => {
+  courseRepository.addLessonToModule(req, res);
+});
+
 courseRoutes.get('/get-courses', (req, res) => {
   courseRepository.getCourses(req, res);
 });
