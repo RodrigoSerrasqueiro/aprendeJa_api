@@ -54,6 +54,13 @@ async function validateCourseData(data) {
   return errors;
 }
 
+function removeAccents(str) {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 class CourseRepository {
 
   async createCourse(req, res) {
@@ -202,6 +209,17 @@ class CourseRepository {
       res.status(200).json(courses)
     } catch (error) {
       res.status(500).json({ error: 'Erro ao obter os cursos.' });
+    }
+  }
+
+  async searchCourses(searchString, res) {
+    try {
+      const courses = await Course.find({ courseName: { $regex: searchString, $options: 'i' } });
+  
+      res.status(200).json(courses);
+    } catch (error) {
+      console.error('Erro ao pesquisar cursos:', error);
+      res.status(500).json({ error: 'Erro ao pesquisar cursos.' });
     }
   }
 

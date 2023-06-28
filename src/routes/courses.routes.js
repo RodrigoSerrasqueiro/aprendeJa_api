@@ -20,6 +20,11 @@ courseRoutes.get('/get-courses', (req, res) => {
   courseRepository.getCourses(req, res);
 });
 
+courseRoutes.get('/search-courses', (req, res) => {
+  const searchString = req.query.search;
+  courseRepository.searchCourses(searchString, res);
+});
+
 courseRoutes.patch('/update-course/:courseID', (req, res) => {
   courseRepository.updateCourse(req, res);
 });
