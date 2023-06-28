@@ -205,6 +205,189 @@ class CourseRepository {
     }
   }
 
+  async updateCourse(req, res) {
+    const { courseID } = req.params;
+    const { courseType, courseSubType, courseName, courseImage, courseDescription } = req.body;
+  
+    const updatedCourse = {
+      ...(courseType && { courseType }),
+      ...(courseSubType && { courseSubType }),
+      ...(courseName && { courseName }),
+      ...(courseImage && { courseImage }),
+      ...(courseDescription && { courseDescription }),
+    };
+  
+    try {
+      const course = await Course.findOneAndUpdate({ courseID }, { $set: updatedCourse }, { new: true });
+  
+      if (!course) {
+        res.status(404).json({ error: 'Curso não encontrado para atualização.' });
+        return;
+      }
+  
+      res.status(200).json({message: "Curso atualizado com sucesso", course: course});
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao atualizar os dados do curso.' });
+    }
+  }
+
+  async updateModuleInCourse(req, res) {
+    const { courseID, moduleID } = req.params;
+    const { moduleName } = req.body;
+  
+    try {
+      const course = await Course.findOne({ courseID });
+  
+      if (!course) {
+        res.status(404).json({ error: 'Curso não encontrado.' });
+        return;
+      }
+  
+      const module = course.modules.find((mod) => mod.moduleID === moduleID);
+  
+      if (!module) {
+        res.status(404).json({ error: 'Módulo não encontrado nesse curso.' });
+        return;
+      }
+  
+      module.moduleName = moduleName;
+      await course.save();
+  
+      res.status(200).json({ message: 'Nome do módulo atualizado com sucesso.', course });
+    } catch (error) {
+      console.error('Erro ao atualizar módulo:', error);
+      res.status(500).json({ error: 'Não foi possível atualizar o módulo.' });
+    }
+  }
+
+  async updateLessonInModule(req, res) {
+    const { courseID, moduleID, lessonID } = req.params;
+    const { lessonTitle, lessonDescription, lessonVideoURL } = req.body;
+  
+    try {
+      const course = await Course.findOne({ courseID });
+  
+      if (!course) {
+        res.status(404).json({ error: 'Curso não encontrado.' });
+        return;
+      }
+  
+      const module = course.modules.find((mod) => mod.moduleID === moduleID);
+  
+      if (!module) {
+        res.status(404).json({ error: 'Módulo não encontrado nesse curso.' });
+        return;
+      }
+  
+      const lesson = module.lessons.find((les) => les.lessonID === lessonID);
+  
+      if (!lesson) {
+        res.status(404).json({ error: 'Aula não encontrada nesse módulo.' });
+        return;
+      }
+  
+      if (lessonTitle) {
+        lesson.lessonTitle = lessonTitle;
+      }
+  
+      if (lessonDescription) {
+        lesson.lessonDescription = lessonDescription;
+      }
+  
+      if (lessonVideoURL) {
+        lesson.lessonVideoURL = lessonVideoURL;
+      }
+  
+      await course.save();
+  
+      res.status(200).json({ message: 'Dados da aula atualizados com sucesso.', course });
+    } catch (error) {
+      console.error('Erro ao atualizar aula:', error);
+      res.status(500).json({ error: 'Não foi possível atualizar a aula.' });
+    }
+  }
+
+  async deleteCourse(req, res) {
+    const { courseID } = req.params;
+  
+    try {
+      const course = await Course.findOneAndDelete({ courseID });
+  
+      if (!course) {
+        res.status(404).json({ error: 'Curso não encontrado.' });
+        return;
+      }
+  
+      res.status(200).json({ message: 'Curso excluído com sucesso.' });
+    } catch (error) {
+      console.error('Erro ao excluir curso:', error);
+      res.status(500).json({ error: 'Não foi possível excluir o curso.' });
+    }
+  }
+
+  async deleteModuleFromCourse(req, res) {
+    const { courseID, moduleID } = req.params;
+  
+    try {
+      const course = await Course.findOne({ courseID });
+  
+      if (!course) {
+        res.status(404).json({ error: 'Curso não encontrado.' });
+        return;
+      }
+  
+      const moduleIndex = course.modules.findIndex((module) => module.moduleID === moduleID);
+  
+      if (moduleIndex === -1) {
+        res.status(404).json({ error: 'Módulo não encontrado neste curso.' });
+        return;
+      }
+  
+      course.modules.splice(moduleIndex, 1);
+      await course.save();
+  
+      res.status(200).json({ message: 'Módulo excluído com sucesso.' });
+    } catch (error) {
+      console.error('Erro ao excluir módulo do curso:', error);
+      res.status(500).json({ error: 'Não foi possível excluir o módulo do curso.' });
+    }
+  }
+
+  async deleteLessonFromModule(req, res) {
+    const { courseID, moduleID, lessonID } = req.params;
+  
+    try {
+      const course = await Course.findOne({ courseID });
+  
+      if (!course) {
+        res.status(404).json({ error: "Curso não encontrado." });
+        return;
+      }
+  
+      const module = course.modules.find((mod) => mod.moduleID === moduleID);
+  
+      if (!module) {
+        res.status(404).json({ error: "Módulo não encontrado nesse curso." });
+        return;
+      }
+  
+      const lessonIndex = module.lessons.findIndex((lesson) => lesson.lessonID === lessonID);
+  
+      if (lessonIndex === -1) {
+        res.status(404).json({ error: "Aula não encontrada nesse módulo." });
+        return;
+      }
+  
+      module.lessons.splice(lessonIndex, 1);
+      await course.save();
+  
+      res.status(200).json({ message: "Aula removida do módulo com sucesso.", course });
+    } catch (error) {
+      console.error('Erro ao remover aula do módulo:', error);
+      res.status(500).json({ error: "Não foi possível remover a aula do módulo." });
+    }
+  }
+
 }
 
 export default CourseRepository;
