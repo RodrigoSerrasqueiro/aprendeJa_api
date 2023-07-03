@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 import fs from 'fs'
+import dotenv from 'dotenv'
+dotenv.config()
 
 class VideoRepository {
 
@@ -8,14 +10,14 @@ class VideoRepository {
   async uploadVideo (req, res) {
     const video = req.file 
     console.log(video)
-    const API_KEY = 'panda-c57b79e21cde1ae62730d8067fef00e6953bbb1afbbb9868519561e8b1b5d68d'
+    const apiKey = process.env.API_KEY
     const FOLDER_ID = null
     const FILENAME = req.file.originalname
     const VIDEO_ID = uuidv4()
     const parseToBase64 = string=>Buffer.from(string).toString('base64')
     const binaryFile = fs.readFileSync(req.file.path);
 
-    let metadata = `authorization ${parseToBase64(API_KEY)}`
+    let metadata = `authorization ${parseToBase64(apiKey)}`
     if(FOLDER_ID){ 
       metadata += `, folder_id ${parseToBase64(FOLDER_ID)}`
     }
@@ -25,7 +27,7 @@ class VideoRepository {
     try {
       const {data: uploadServers} = await axios.get('https://api-v2.pandavideo.com.br/hosts/uploader',{
         headers:{
-          'Authorization': API_KEY,
+          'Authorization': apiKey,
         }
       });
       const allHosts = Object.values(uploadServers.hosts).reduce((acc,curr)=>([...acc,...curr]),[]);
