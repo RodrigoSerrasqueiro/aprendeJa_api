@@ -69,7 +69,7 @@ class VideoRepository {
         } catch (error) {
           res.status(404).json({ message: 'Erro ao obter os dados do vídeo', error: error });
         }
-      }, 30000); // Atraso de 30 segundos (2000 milissegundos)
+      }, 10000); // Atraso de 10 segundos 
   
     } catch (error) {
       res.status(500).json({ message: 'Erro ao realizar o upload', error: error });
