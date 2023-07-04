@@ -54,13 +54,6 @@ async function validateCourseData(data) {
   return errors;
 }
 
-function removeAccents(str) {
-  return str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-}
-
 class CourseRepository {
 
   async createCourse(req, res) {
@@ -70,7 +63,8 @@ class CourseRepository {
       courseName, 
       courseImage, 
       courseDescription, 
-      moduleName, 
+      moduleName,
+      lessonID, 
       lessonTitle, 
       lessonDescription, 
       lessonVideoURL 
@@ -78,7 +72,6 @@ class CourseRepository {
   
     const courseID = uuidv4();
     const moduleID = uuidv4();
-    const lessonID = uuidv4();
 
     const validationErrors = await validateCourseData(req.body);
     if (validationErrors.length > 0) {
@@ -129,11 +122,10 @@ class CourseRepository {
 
   async addModuleToCourse(req, res) {
     const { courseID } = req.params
-    const { moduleName, lessonTitle, lessonDescription, lessonVideoURL } = req.body
+    const { moduleName, lessonID, lessonTitle, lessonDescription, lessonVideoURL } = req.body
 
     try {
       const moduleID = uuidv4();
-      const lessonID = uuidv4();
   
       const lesson = {
         lessonID,
@@ -168,9 +160,8 @@ class CourseRepository {
   async addLessonToModule(req, res) {
 
     const {courseID, moduleID} = req.params
-    const { lessonTitle, lessonDescription, lessonVideoURL } = req.body
+    const { lessonID, lessonTitle, lessonDescription, lessonVideoURL } = req.body
     try {
-      const lessonID = uuidv4();
   
       const lesson = {
         lessonID,
