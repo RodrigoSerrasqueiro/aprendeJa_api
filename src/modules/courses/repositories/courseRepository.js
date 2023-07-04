@@ -48,7 +48,7 @@ async function validateCourseData(data) {
   }
 
   if (!lessonVideoURL) {
-    errors.push("Realize o upload da vídeo aula.");
+    errors.push("Realize o upload da vídeo aula."); 
   }
 
   return errors;
