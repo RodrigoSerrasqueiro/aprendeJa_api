@@ -7,6 +7,7 @@ async function validateCourseData(data) {
     courseSubType, 
     courseName, 
     courseImage, 
+    courseImageRef,
     courseDescription, 
     moduleName, 
     lessonTitle, 
@@ -29,6 +30,10 @@ async function validateCourseData(data) {
 
   if (!courseImage) {
     errors.push("Insira a imagem do curso.");
+  }
+
+  if (!courseImageRef) {
+    errors.push("Problemas na imagem do curso.");
   }
 
   if (!courseDescription) {
@@ -61,7 +66,8 @@ class CourseRepository {
       courseType, 
       courseSubType, 
       courseName, 
-      courseImage, 
+      courseImage,
+      courseImageRef, 
       courseDescription, 
       moduleName,
       lessonID, 
@@ -98,6 +104,7 @@ class CourseRepository {
       courseSubType,
       courseName,
       courseImage,
+      courseImageRef,
       courseDescription,
       modules: [courseModule]
     };
