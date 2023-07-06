@@ -9,10 +9,6 @@ async function validateCourseData(data) {
     courseImage, 
     courseImageRef,
     courseDescription, 
-    moduleName, 
-    lessonTitle, 
-    lessonDescription, 
-    lessonVideoURL 
   } = data;
   const errors = [];
 
@@ -40,22 +36,6 @@ async function validateCourseData(data) {
     errors.push("O campo 'descrição do curso' é obrigatório.");
   }
 
-  if (!moduleName) {
-    errors.push("O campo 'nome do módulo' é obrigatório.");
-  }
-
-  if (!lessonTitle) {
-    errors.push("O campo 'título da aula' é obrigatório.");
-  }
-
-  if (!lessonDescription) {
-    errors.push("O campo 'descrição da aula' é obrigatório.");
-  }
-
-  if (!lessonVideoURL) {
-    errors.push("Realize o upload da vídeo aula.");
-  }
-
   return errors;
 }
 
@@ -69,34 +49,15 @@ class CourseRepository {
       courseImage,
       courseImageRef, 
       courseDescription, 
-      moduleName,
-      lessonID, 
-      lessonTitle, 
-      lessonDescription, 
-      lessonVideoURL 
     } = req.body;
   
     const courseID = uuidv4();
-    const moduleID = uuidv4();
 
     const validationErrors = await validateCourseData(req.body);
     if (validationErrors.length > 0) {
       res.status(400).json({ errors: validationErrors });
       return;
     }
-  
-    const lesson = {
-      lessonID,
-      lessonTitle,
-      lessonDescription,
-      lessonVideoURL
-    };
-  
-    const courseModule = {
-      moduleID,
-      moduleName,
-      lessons: [lesson]
-    };
   
     const course = {
       courseID,
@@ -106,7 +67,7 @@ class CourseRepository {
       courseImage,
       courseImageRef,
       courseDescription,
-      modules: [courseModule]
+      modules: []
     };
   
     try {
@@ -129,22 +90,15 @@ class CourseRepository {
 
   async addModuleToCourse(req, res) {
     const { courseID } = req.params
-    const { moduleName, lessonID, lessonTitle, lessonDescription, lessonVideoURL } = req.body
+    const { moduleName } = req.body
 
     try {
       const moduleID = uuidv4();
   
-      const lesson = {
-        lessonID,
-        lessonTitle,
-        lessonDescription,
-        lessonVideoURL
-      };
-  
       const module = {
         moduleID,
         moduleName,
-        lessons: [lesson]
+        lessons: []
       };
   
       const course = await Course.findOne({ courseID });
