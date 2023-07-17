@@ -18,8 +18,6 @@ const courseSchema = new mongoose.Schema({
   courseType: { type: String, required: true },
   courseSubType: { type: String, required: true },
   courseName: { type: String, required: true },
-  courseImage: { type: String, required: true },
-  courseImageRef: { type: String, required: true },
   courseDescription: { type: String, required: true },
   modules: [moduleSchema],
 });

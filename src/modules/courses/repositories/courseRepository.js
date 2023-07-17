@@ -6,8 +6,6 @@ async function validateCourseData(data) {
     courseType, 
     courseSubType, 
     courseName, 
-    courseImage, 
-    courseImageRef,
     courseDescription, 
   } = data;
   const errors = [];
@@ -24,14 +22,6 @@ async function validateCourseData(data) {
     errors.push("O campo 'nome do curso' é obrigatório.");
   }
 
-  if (!courseImage) {
-    errors.push("Insira a imagem do curso.");
-  }
-
-  if (!courseImageRef) {
-    errors.push("Problemas na imagem do curso.");
-  }
-
   if (!courseDescription) {
     errors.push("O campo 'descrição do curso' é obrigatório.");
   }
@@ -46,8 +36,6 @@ class CourseRepository {
       courseType, 
       courseSubType, 
       courseName, 
-      courseImage,
-      courseImageRef, 
       courseDescription, 
     } = req.body;
   
@@ -64,8 +52,6 @@ class CourseRepository {
       courseType,
       courseSubType,
       courseName,
-      courseImage,
-      courseImageRef,
       courseDescription,
       modules: []
     };
