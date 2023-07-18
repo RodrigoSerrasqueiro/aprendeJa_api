@@ -22,6 +22,7 @@ const courseSchema = new mongoose.Schema({
   courseDescription: { type: String, required: true },
   courseWorkload: { type: String, required: true },
   teacherName: { type: String, required: true },
+  courseLevel: { type: String, required: true },
   modules: [moduleSchema],
 });
 

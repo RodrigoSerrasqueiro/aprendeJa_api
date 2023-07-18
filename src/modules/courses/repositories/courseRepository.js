@@ -9,7 +9,8 @@ async function validateCourseData(data) {
     courseImage,
     courseDescription, 
     courseWorkload,
-    teacherName
+    teacherName, 
+    courseLevel
   } = data;
   const errors = [];
 
@@ -41,6 +42,10 @@ async function validateCourseData(data) {
     errors.push("O campo 'nome do professor(a) do curso' é obrigatório.");
   }
 
+  if (!courseLevel) {
+    errors.push("O campo 'nível do curso' é obrigatório.");
+  }
+
   return errors;
 }
 
@@ -54,7 +59,8 @@ class CourseRepository {
       courseImage,
       courseDescription, 
       courseWorkload,
-      TeacherName
+      TeacherName,
+      courseLevel
     } = req.body;
   
     const courseID = uuidv4();
@@ -74,6 +80,7 @@ class CourseRepository {
       courseDescription,
       courseWorkload,
       TeacherName,
+      courseLevel,
       modules: []
     };
   
