@@ -59,7 +59,7 @@ class CourseRepository {
       courseImage,
       courseDescription, 
       courseWorkload,
-      TeacherName,
+      teacherName,
       courseLevel
     } = req.body;
   
@@ -79,7 +79,7 @@ class CourseRepository {
       courseImage,
       courseDescription,
       courseWorkload,
-      TeacherName,
+      teacherName,
       courseLevel,
       modules: []
     };
