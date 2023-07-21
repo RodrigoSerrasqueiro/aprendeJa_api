@@ -1,11 +1,16 @@
 import { Router } from "express";
 import CourseRepository from "../modules/courses/repositories/courseRepository.js";
+import upload from "../multerConfig.js";
 
 const courseRoutes =  Router();
 const courseRepository = new CourseRepository();
 
 courseRoutes.post('/create-course', (req, res) => {
   courseRepository.createCourse(req, res);
+});
+
+courseRoutes.post('/upload-image', upload.single('courseImage'), (req, res) => {
+  courseRepository.uploadCourseImage(req, res);
 });
 
 courseRoutes.post('/new-module/:courseID', (req, res) => {

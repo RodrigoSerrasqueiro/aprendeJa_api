@@ -1,5 +1,8 @@
 import Course from "../models/course.model.js";
 import { v4 as uuidv4 } from 'uuid'
+import s3 from '../../../awsConfig.js'
+import dotenv  from 'dotenv'
+dotenv.config()
 
 async function validateCourseData(data) {
   const { 
@@ -50,6 +53,38 @@ async function validateCourseData(data) {
 }
 
 class CourseRepository {
+
+  async uploadCourseImage(req, res) {
+    try {
+      if (!req.file) {
+        res.status(400).json({ error: 'Nenhuma imagem foi enviada.' });
+        return;
+      }
+
+      const { originalname, buffer } = req.file;
+      const imageKey = `images/${uuidv4()}-${originalname}`;
+
+      const s3Params = {
+        Bucket: process.env.BUCKET_NAME, // Substitua pelo nome do seu bucket S3
+        Key: imageKey,
+        Body: buffer,
+      };
+
+      await s3.upload(s3Params).promise();
+
+      // Agora você tem o URL da imagem no S3 após o upload
+      const imageUrl = `https://${s3Params.Bucket}.s3.amazonaws.com/${s3Params.Key}`;
+
+      // Aqui você pode realizar outras ações com o URL da imagem, como salvá-lo no banco de dados
+      // Por exemplo, você pode adicionar o URL da imagem ao objeto do curso que foi criado anteriormente
+      
+      res.status(201).json({ imageUrl });
+    } catch (error) {
+      console.error('Erro ao enviar a imagem para o S3:', error);
+      res.status(500).json({ error: 'Não foi possível enviar a imagem para o S3.' });
+    }
+  }
+
 
   async createCourse(req, res) {
     const { 
