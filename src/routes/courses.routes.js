@@ -30,6 +30,10 @@ courseRoutes.get('/search-courses', (req, res) => {
   courseRepository.searchCourses(searchString, res);
 });
 
+courseRoutes.get('/get-course/:courseID', (req, res) => {
+  courseRepository.findOneCourse(req, res)
+})
+
 courseRoutes.patch('/update-course/:courseID', (req, res) => {
   courseRepository.updateCourse(req, res);
 });

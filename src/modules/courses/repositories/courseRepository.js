@@ -224,6 +224,23 @@ class CourseRepository {
     }
   }
 
+  async findOneCourse(req, res) {
+    const { courseID } = req.params;
+    try {
+      const course = await Course.findOne({ courseID });
+  
+      if (!course) {
+        res.status(404).json({ error: 'Curso não encontrado.' });
+        return;
+      }
+  
+      res.status(200).json(course);
+    } catch (error) {
+      console.error('Erro ao pesquisar curso:', error);
+      res.status(500).json({ error: 'Erro ao pesquisar curso.' });
+    }
+  }
+
   async updateCourse(req, res) {
     const { courseID } = req.params;
     const { courseType, courseSubType, courseName, courseImage, courseDescription } = req.body;
