@@ -243,7 +243,7 @@ class CourseRepository {
 
   async updateCourse(req, res) {
     const { courseID } = req.params;
-    const { courseType, courseSubType, courseName, courseImage, courseDescription } = req.body;
+    const { courseType, courseSubType, courseName, courseImage, courseDescription, courseWorkload, teacherName, courseLevel } = req.body;
   
     const updatedCourse = {
       ...(courseType && { courseType }),
@@ -251,6 +251,9 @@ class CourseRepository {
       ...(courseName && { courseName }),
       ...(courseImage && { courseImage }),
       ...(courseDescription && { courseDescription }),
+      ...(courseWorkload && { courseWorkload }),
+      ...(teacherName && { teacherName }),
+      ...(courseLevel && { courseLevel }),
     };
   
     try {
